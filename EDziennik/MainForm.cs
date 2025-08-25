@@ -21,8 +21,9 @@ namespace EDziennik
 
         private void btnStudents_Click(object sender, EventArgs e)
         {
-            StudentsForm studentsForm = new StudentsForm();
-            studentsForm.ShowDialog(); // Modalne okno
+            string connStr = "Host=localhost;Port=5433;Database=edziennik;Username=postgres;Password=g77ogp;";
+            StudentsForm studentsForm = new StudentsForm(connStr);
+            studentsForm.ShowDialog();
         }
     }
 }

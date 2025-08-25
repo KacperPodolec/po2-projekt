@@ -37,3 +37,4 @@ D:\Studia\GitHub\po2-projekt\EDziennik\obj\Debug\EDziennik.csproj.Up2Date
 D:\Studia\GitHub\po2-projekt\EDziennik\obj\Debug\EDziennik.exe
 D:\Studia\GitHub\po2-projekt\EDziennik\obj\Debug\EDziennik.pdb
 D:\Studia\GitHub\po2-projekt\EDziennik\obj\Debug\EDziennik.MainForm.resources
+D:\Studia\GitHub\po2-projekt\EDziennik\obj\Debug\EDziennik.StudentsForm.resources
