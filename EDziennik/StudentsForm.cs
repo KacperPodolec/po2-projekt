@@ -1,34 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using EDziennik.Data.Repositories;
 using EDziennik.Models;
 
 namespace EDziennik
 {
-    public partial class StudentsForm: Form
+    public partial class StudentsForm : Form
     {
-        private readonly string _connectionString;
+        private string _connectionString;
+        private StudentListItem _selectedStudentItem;
 
         public StudentsForm(string connectionString)
         {
             InitializeComponent();
             _connectionString = connectionString;
-
-            this.Load += StudentsForm_Load;
-            this.dgvStudents.SelectionChanged += dgvStudents_SelectionChanged;
-        }
-
-        private void StudentsForm_Load(object sender, EventArgs e)
-        {
             LoadClasses();
             LoadStudents();
+        }
+
+        private void LoadClasses()
+        {
+            var classRepo = new ClassRepository(_connectionString);
+            cmbClass.DataSource = classRepo.GetAll();
+            cmbClass.DisplayMember = "Name";
+            cmbClass.ValueMember = "Id";
+            cmbClass.SelectedIndex = -1; // brak domyślnego wyboru
         }
 
         private void LoadStudents()
@@ -36,17 +34,15 @@ namespace EDziennik
             try
             {
                 var repo = new StudentRepository(_connectionString);
-                List<StudentListItem> data = repo.GetAllWithClassNames();
+                var data = repo.GetAllWithClassNames();
 
                 dgvStudents.AutoGenerateColumns = true;
                 dgvStudents.DataSource = data;
                 dgvStudents.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
-                // Ukrycie kolumny Id, jeśli istnieje
+                // ukrywanie niepotrzebnych kolumn
                 if (dgvStudents.Columns["Id"] != null)
                     dgvStudents.Columns["Id"].Visible = false;
-
-                // W razie czego ukrycie innych niepotrzebnych kolumn
                 if (dgvStudents.Columns["ClassId"] != null)
                     dgvStudents.Columns["ClassId"].Visible = false;
                 if (dgvStudents.Columns["CreatedAt"] != null)
@@ -58,132 +54,199 @@ namespace EDziennik
             }
         }
 
-
-
-        private void LoadClasses()
+        private bool ValidateStudentFields()
         {
-            var classRepo = new ClassRepository(_connectionString);
-            var classes = classRepo.GetAll();
-            cmbClass.DataSource = classes;
-            cmbClass.DisplayMember = "Name";
-            cmbClass.ValueMember = "Id";
-        }
+            if (string.IsNullOrWhiteSpace(txtFirstName.Text))
+            {
+                MessageBox.Show("Imię nie może być puste.");
+                return false;
+            }
 
+            if (!txtFirstName.Text.All(Char.IsLetter))
+            {
+                MessageBox.Show("Imię może zawierać tylko litery.");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtLastName.Text))
+            {
+                MessageBox.Show("Nazwisko nie może być puste.");
+                return false;
+            }
+
+            if (!txtLastName.Text.All(Char.IsLetter))
+            {
+                MessageBox.Show("Nazwisko może zawierać tylko litery.");
+                return false;
+            }
+
+            if (cmbClass.SelectedIndex < 0)
+            {
+                MessageBox.Show("Wybierz klasę.");
+                return false;
+            }
+
+            return true;
+        }
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
+            if (!ValidateStudentFields())
+                return;
+
+            var student = new Student
+            {
+                FirstName = txtFirstName.Text,
+                LastName = txtLastName.Text,
+                BirthDate = dtpBirthDate.Value,
+                ClassId = (int)cmbClass.SelectedValue
+            };
+
             try
             {
                 var repo = new StudentRepository(_connectionString);
-
-                var student = new Student
-                {
-                    FirstName = txtFirstName.Text,
-                    LastName = txtLastName.Text,
-                    BirthDate = dtpBirthDate.Value,
-                    ClassId = (int)cmbClass.SelectedValue
-                };
-
                 repo.Add(student);
-                LoadStudents();
-
                 MessageBox.Show("Uczeń został dodany.");
+                LoadStudents();
+                ClearForm();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Błąd podczas dodawania: {ex.Message}");
+                MessageBox.Show($"Błąd podczas dodawania ucznia: {ex.Message}");
             }
         }
-
 
         private void btnEdit_Click(object sender, EventArgs e)
         {
-            if (dgvStudents.CurrentRow == null)
+            if (_selectedStudentItem == null)
             {
-                MessageBox.Show("Wybierz ucznia do edycji.");
+                MessageBox.Show("Wybierz ucznia.");
                 return;
             }
+
+            if (!ValidateStudentFields())
+                return;
 
             try
             {
                 var repo = new StudentRepository(_connectionString);
+                var student = repo.GetById(_selectedStudentItem.Id);
 
-                var student = new Student
+                if (student == null)
                 {
-                    Id = (int)dgvStudents.CurrentRow.Cells["Id"].Value,
-                    FirstName = txtFirstName.Text,
-                    LastName = txtLastName.Text,
-                    BirthDate = dtpBirthDate.Value,
-                    ClassId = (int)cmbClass.SelectedValue
-                };
+                    MessageBox.Show("Nie można odnaleźć ucznia w bazie.");
+                    return;
+                }
+
+                student.FirstName = txtFirstName.Text;
+                student.LastName = txtLastName.Text;
+                student.BirthDate = dtpBirthDate.Value;
+                student.ClassId = (int)cmbClass.SelectedValue;
 
                 repo.Update(student);
+                MessageBox.Show("Uczeń został zaktualizowany.");
                 LoadStudents();
-
-                MessageBox.Show("Dane ucznia zostały zaktualizowane.");
+                ClearForm();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Błąd podczas edycji: {ex.Message}");
+                MessageBox.Show($"Błąd podczas edycji ucznia: {ex.Message}");
             }
         }
-
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            if (dgvStudents.CurrentRow == null)
+            if (_selectedStudentItem == null)
             {
-                MessageBox.Show("Wybierz ucznia do usunięcia.");
+                MessageBox.Show("Wybierz ucznia.");
                 return;
             }
 
-            var confirm = MessageBox.Show("Czy na pewno chcesz usunąć ucznia?", "Potwierdzenie", MessageBoxButtons.YesNo);
-            if (confirm == DialogResult.No) return;
+            var result = MessageBox.Show(
+                $"Czy na pewno chcesz usunąć {_selectedStudentItem.FirstName} {_selectedStudentItem.LastName}?",
+                "Potwierdzenie",
+                MessageBoxButtons.YesNo
+            );
 
-            try
+            if (result == DialogResult.Yes)
             {
-                var repo = new StudentRepository(_connectionString);
-
-                int id = (int)dgvStudents.CurrentRow.Cells["Id"].Value;
-                repo.Delete(id);
-                LoadStudents();
-
-                MessageBox.Show("Uczeń został usunięty.");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Błąd podczas usuwania: {ex.Message}");
+                try
+                {
+                    var repo = new StudentRepository(_connectionString);
+                    MessageBox.Show($"Usuwanie ucznia o Id = {_selectedStudentItem.Id}");
+                    repo.Delete(_selectedStudentItem.Id);
+                    MessageBox.Show("Uczeń został usunięty.");
+                    LoadStudents();
+                    ClearForm();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Błąd podczas usuwania ucznia: {ex.Message}");
+                }
             }
         }
-
 
         private void dgvStudents_SelectionChanged(object sender, EventArgs e)
         {
             if (dgvStudents.CurrentRow != null)
             {
-                txtFirstName.Text = dgvStudents.CurrentRow.Cells["FirstName"].Value.ToString();
-                txtLastName.Text = dgvStudents.CurrentRow.Cells["LastName"].Value.ToString();
-                dtpBirthDate.Value = (DateTime)dgvStudents.CurrentRow.Cells["BirthDate"].Value;
-                cmbClass.SelectedValue = dgvStudents.CurrentRow.Cells["ClassId"].Value;
+                // Konwersja wiersza na obiekt powiązany z DataSource
+                _selectedStudentItem = dgvStudents.CurrentRow.DataBoundItem as StudentListItem;
+
+                if (_selectedStudentItem != null)
+                {
+                    txtFirstName.Text = _selectedStudentItem.FirstName;
+                    txtLastName.Text = _selectedStudentItem.LastName;
+                    dtpBirthDate.Value = _selectedStudentItem.BirthDate;
+                    cmbClass.SelectedValue = _selectedStudentItem.ClassId;
+                }
             }
         }
 
+
+
         private void btnSearch_Click(object sender, EventArgs e)
         {
-            var repo = new StudentRepository(_connectionString);
-            var keyword = txtSearch.Text.Trim();
+            try
+            {
+                var repo = new StudentRepository(_connectionString);
+                string query = txtSearch.Text.Trim();
 
-            List<StudentListItem> students;
-            if (string.IsNullOrEmpty(keyword))
-                students = repo.GetAllWithClassNames();
-            else
-                students = repo.SearchByName(keyword);
+                List<StudentListItem> results;
 
-            dgvStudents.DataSource = students;
-            dgvStudents.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                if (string.IsNullOrWhiteSpace(query))
+                    results = repo.GetAllWithClassNames();
+                else
+                    results = repo.SearchByName(query); // metoda w repozytorium, zwraca List<StudentListItem>
+
+                dgvStudents.DataSource = null;
+                dgvStudents.DataSource = results;
+                dgvStudents.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+                // ukrywanie kolumn
+                if (dgvStudents.Columns["Id"] != null)
+                    dgvStudents.Columns["Id"].Visible = false;
+                if (dgvStudents.Columns["ClassId"] != null)
+                    dgvStudents.Columns["ClassId"].Visible = false;
+                if (dgvStudents.Columns["CreatedAt"] != null)
+                    dgvStudents.Columns["CreatedAt"].Visible = false;
+
+                _selectedStudentItem = null;
+                ClearForm();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Błąd podczas wyszukiwania uczniów: {ex.Message}");
+            }
         }
 
-
-
+        private void ClearForm()
+        {
+            txtFirstName.Clear();
+            txtLastName.Clear();
+            dtpBirthDate.Value = DateTime.Today;
+            cmbClass.SelectedIndex = -1;
+            _selectedStudentItem = null;
+        }
     }
 }

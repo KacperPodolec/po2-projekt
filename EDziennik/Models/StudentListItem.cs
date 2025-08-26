@@ -8,11 +8,11 @@ namespace EDziennik.Models
 {
     public class StudentListItem
     {
-        public int Id { get; set; }          
+        public int Id { get; set; }
         public string FirstName { get; set; }
-        public string LastName { get; set; } 
+        public string LastName { get; set; }
         public DateTime BirthDate { get; set; }
-        public int ClassId { get; set; }   
+        public int ClassId { get; set; }
         public string ClassName { get; set; }
     }
 }
