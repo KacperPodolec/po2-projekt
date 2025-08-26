@@ -25,5 +25,12 @@ namespace EDziennik
             StudentsForm studentsForm = new StudentsForm(connStr);
             studentsForm.ShowDialog();
         }
+
+        private void btnGrades_Click(object sender, EventArgs e)
+        {
+            string connStr = "Host=localhost;Port=5433;Database=edziennik;Username=postgres;Password=g77ogp;";
+            GradesForm gradesForm = new GradesForm(connStr);
+            gradesForm.ShowDialog();
+        }
     }
 }

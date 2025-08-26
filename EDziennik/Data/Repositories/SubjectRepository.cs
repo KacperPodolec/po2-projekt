@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Npgsql;
 using EDziennik.Models;
 
@@ -14,13 +13,14 @@ namespace EDziennik.Data.Repositories
             _connectionString = connectionString;
         }
 
+        // Pobiera wszystkie przedmioty
         public List<Subject> GetAll()
         {
             var subjects = new List<Subject>();
             using (var conn = new NpgsqlConnection(_connectionString))
             {
                 conn.Open();
-                using (var cmd = new NpgsqlCommand("SELECT id, name, created_at FROM subjects", conn))
+                using (var cmd = new NpgsqlCommand("SELECT id, name FROM subjects", conn))
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -28,8 +28,7 @@ namespace EDziennik.Data.Repositories
                         subjects.Add(new Subject
                         {
                             Id = reader.GetInt32(0),
-                            Name = reader.GetString(1),
-                            CreatedAt = reader.GetDateTime(2)
+                            Name = reader.GetString(1)
                         });
                     }
                 }
@@ -37,70 +36,34 @@ namespace EDziennik.Data.Repositories
             return subjects;
         }
 
-        public Subject GetById(int id)
+        // Pobiera przedmioty dla danego ucznia
+        public List<Subject> GetByStudent(int studentId)
         {
-            Subject subject = null;
+            var subjects = new List<Subject>();
             using (var conn = new NpgsqlConnection(_connectionString))
             {
                 conn.Open();
-                using (var cmd = new NpgsqlCommand("SELECT id, name, created_at FROM subjects WHERE id=@id", conn))
+                using (var cmd = new NpgsqlCommand(
+                    @"SELECT DISTINCT s.id, s.name 
+                      FROM subjects s
+                      JOIN grades g ON g.subject_id = s.id
+                      WHERE g.student_id = @studentId", conn))
                 {
-                    cmd.Parameters.AddWithValue("id", id);
+                    cmd.Parameters.AddWithValue("studentId", studentId);
                     using (var reader = cmd.ExecuteReader())
                     {
-                        if (reader.Read())
+                        while (reader.Read())
                         {
-                            subject = new Subject
+                            subjects.Add(new Subject
                             {
                                 Id = reader.GetInt32(0),
-                                Name = reader.GetString(1),
-                                CreatedAt = reader.GetDateTime(2)
-                            };
+                                Name = reader.GetString(1)
+                            });
                         }
                     }
                 }
             }
-            return subject;
-        }
-
-        public void Add(Subject subject)
-        {
-            using (var conn = new NpgsqlConnection(_connectionString))
-            {
-                conn.Open();
-                using (var cmd = new NpgsqlCommand("INSERT INTO subjects (name) VALUES (@name) RETURNING id", conn))
-                {
-                    cmd.Parameters.AddWithValue("name", subject.Name);
-                    subject.Id = (int)cmd.ExecuteScalar();
-                }
-            }
-        }
-
-        public void Update(Subject subject)
-        {
-            using (var conn = new NpgsqlConnection(_connectionString))
-            {
-                conn.Open();
-                using (var cmd = new NpgsqlCommand("UPDATE subjects SET name=@name WHERE id=@id", conn))
-                {
-                    cmd.Parameters.AddWithValue("name", subject.Name);
-                    cmd.Parameters.AddWithValue("id", subject.Id);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        public void Delete(int id)
-        {
-            using (var conn = new NpgsqlConnection(_connectionString))
-            {
-                conn.Open();
-                using (var cmd = new NpgsqlCommand("DELETE FROM subjects WHERE id=@id", conn))
-                {
-                    cmd.Parameters.AddWithValue("id", id);
-                    cmd.ExecuteNonQuery();
-                }
-            }
+            return subjects;
         }
     }
 }

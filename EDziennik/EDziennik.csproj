@@ -101,6 +101,12 @@
     <Compile Include="Data\Repositories\TeacherRepository.cs" />
     <Compile Include="Data\Repositories\TeacherSubjectClassRepository.cs" />
     <Compile Include="Data\Repositories\UserRepository.cs" />
+    <Compile Include="GradesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GradesForm.Designer.cs">
+      <DependentUpon>GradesForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -110,6 +116,7 @@
     <Compile Include="Models\Attendance.cs" />
     <Compile Include="Models\Class.cs" />
     <Compile Include="Models\Grade.cs" />
+    <Compile Include="Models\GradeListItem.cs" />
     <Compile Include="Models\Student.cs" />
     <Compile Include="Models\StudentListItem.cs" />
     <Compile Include="Models\StudentViewModel.cs" />
@@ -125,6 +132,9 @@
     <Compile Include="StudentsForm.Designer.cs">
       <DependentUpon>StudentsForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="GradesForm.resx">
+      <DependentUpon>GradesForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

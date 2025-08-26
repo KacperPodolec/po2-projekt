@@ -1,133 +1,148 @@
-﻿using System;
+﻿using Npgsql;
+using System;
 using System.Collections.Generic;
-using Npgsql;
 using EDziennik.Models;
+using System.Collections;
 
-namespace EDziennik.Data.Repositories
+public class GradeRepository
 {
-    public class GradeRepository
-    {
-        private string _connectionString;
+    private string _connectionString;
 
-        public GradeRepository(string connectionString)
+    public GradeRepository(string connectionString)
+    {
+        _connectionString = connectionString;
+    }
+
+    public List<GradeListItem> GetByStudent(int studentId)
+    {
+        var grades = new List<GradeListItem>();
+
+        using (var conn = new NpgsqlConnection(_connectionString))
         {
-            _connectionString = connectionString;
+            conn.Open();
+            var cmd = new NpgsqlCommand(@"
+                SELECT g.id, g.student_id, s.name AS subject_name, g.value, g.weight, g.grade_date, g.note
+                FROM grades g
+                JOIN subject s ON g.subject_id = s.id
+                WHERE g.student_id = @studentId
+                ORDER BY g.grade_date DESC", conn);
+
+            cmd.Parameters.AddWithValue("studentId", studentId);
+
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    grades.Add(new GradeListItem
+                    {
+                        Id = reader.GetInt32(0),
+                        StudentId = reader.GetInt32(1),
+                        SubjectName = reader.GetString(2),
+                        Value = reader.GetDecimal(3),
+                        Weight = reader.GetDecimal(4),
+                        GradeDate = reader.GetDateTime(5),
+                        Note = reader.IsDBNull(6) ? "" : reader.GetString(6)
+                    });
+                }
+            }
         }
 
-        public List<Grade> GetAll()
+        return grades;
+    }
+
+    public void Add(Grade grade)
+    {
+        using (var conn = new NpgsqlConnection(_connectionString))
         {
-            var grades = new List<Grade>();
-            using (var conn = new NpgsqlConnection(_connectionString))
+            conn.Open();
+            var cmd = new NpgsqlCommand(@"
+                INSERT INTO grades (student_id, subject_id, teacher_id, value, weight, grade_date, note)
+                VALUES (@studentId, @subjectId, @teacherId, @value, @weight, @gradeDate, @note) RETURNING id", conn);
+
+            cmd.Parameters.AddWithValue("studentId", grade.StudentId);
+            cmd.Parameters.AddWithValue("subjectId", grade.SubjectId);
+            cmd.Parameters.AddWithValue("teacherId", grade.TeacherId);
+            cmd.Parameters.AddWithValue("value", grade.Value);
+            cmd.Parameters.AddWithValue("weight", grade.Weight);
+            cmd.Parameters.AddWithValue("gradeDate", grade.GradeDate);
+            cmd.Parameters.AddWithValue("note", grade.Note ?? "");
+
+            grade.Id = (int)cmd.ExecuteScalar();
+        }
+    }
+
+    public void Update(Grade grade)
+    {
+        using (var conn = new NpgsqlConnection(_connectionString))
+        {
+            conn.Open();
+            var cmd = new NpgsqlCommand(@"
+                UPDATE grades
+                SET subject_id=@subjectId, teacher_id=@teacherId, value=@value, weight=@weight, grade_date=@gradeDate, note=@note
+                WHERE id=@id", conn);
+
+            cmd.Parameters.AddWithValue("subjectId", grade.SubjectId);
+            cmd.Parameters.AddWithValue("teacherId", grade.TeacherId);
+            cmd.Parameters.AddWithValue("value", grade.Value);
+            cmd.Parameters.AddWithValue("weight", grade.Weight);
+            cmd.Parameters.AddWithValue("gradeDate", grade.GradeDate);
+            cmd.Parameters.AddWithValue("note", grade.Note ?? "");
+            cmd.Parameters.AddWithValue("id", grade.Id);
+
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    public void Delete(int id)
+    {
+        using (var conn = new NpgsqlConnection(_connectionString))
+        {
+            conn.Open();
+            var cmd = new NpgsqlCommand("DELETE FROM grades WHERE id=@id", conn);
+            cmd.Parameters.AddWithValue("id", id);
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    public List<GradeListItem> GetByStudentAndSubject(int studentId, int subjectId)
+    {
+        var list = new List<GradeListItem>();
+        string query = "SELECT g.id, g.student_id, g.subject_id, s.name AS subject_name, g.teacher_id, g.value, g.weight, g.grade_date, g.note " +
+                       "FROM grades g " +
+                       "JOIN subjects s ON g.subject_id = s.id " +
+                       "WHERE g.student_id = @studentId AND g.subject_id = @subjectId";
+
+        using (var conn = new NpgsqlConnection(_connectionString))
+        {
+            conn.Open();
+            using (var cmd = new NpgsqlCommand(query, conn))
             {
-                conn.Open();
-                using (var cmd = new NpgsqlCommand("SELECT id, student_id, subject_id, teacher_id, value, weight, grade_date, note, created_at FROM grades", conn))
+                cmd.Parameters.AddWithValue("studentId", studentId);
+                cmd.Parameters.AddWithValue("subjectId", subjectId);
+
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        grades.Add(new Grade
+                        list.Add(new GradeListItem
                         {
                             Id = reader.GetInt32(0),
                             StudentId = reader.GetInt32(1),
                             SubjectId = reader.GetInt32(2),
-                            TeacherId = reader.GetInt32(3),
-                            Value = reader.GetInt16(4),
-                            Weight = reader.GetInt16(5),
-                            GradeDate = reader.GetDateTime(6),
-                            Note = reader.IsDBNull(7) ? "" : reader.GetString(7),
-                            CreatedAt = reader.GetDateTime(8)
+                            SubjectName = reader.GetString(3),
+                            TeacherId = reader.GetInt32(4),
+                            Value = reader.GetDecimal(5),
+                            Weight = reader.GetDecimal(6),
+                            GradeDate = reader.GetDateTime(7),
+                            Note = reader.IsDBNull(8) ? "" : reader.GetString(8)
                         });
                     }
                 }
             }
-            return grades;
         }
 
-        public Grade GetById(int id)
-        {
-            Grade grade = null;
-            using (var conn = new NpgsqlConnection(_connectionString))
-            {
-                conn.Open();
-                using (var cmd = new NpgsqlCommand("SELECT id, student_id, subject_id, teacher_id, value, weight, grade_date, note, created_at FROM grades WHERE id=@id", conn))
-                {
-                    cmd.Parameters.AddWithValue("id", id);
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            grade = new Grade
-                            {
-                                Id = reader.GetInt32(0),
-                                StudentId = reader.GetInt32(1),
-                                SubjectId = reader.GetInt32(2),
-                                TeacherId = reader.GetInt32(3),
-                                Value = reader.GetInt16(4),
-                                Weight = reader.GetInt16(5),
-                                GradeDate = reader.GetDateTime(6),
-                                Note = reader.IsDBNull(7) ? "" : reader.GetString(7),
-                                CreatedAt = reader.GetDateTime(8)
-                            };
-                        }
-                    }
-                }
-            }
-            return grade;
-        }
-
-        public void Add(Grade grade)
-        {
-            using (var conn = new NpgsqlConnection(_connectionString))
-            {
-                conn.Open();
-                using (var cmd = new NpgsqlCommand(
-                    "INSERT INTO grades (student_id, subject_id, teacher_id, value, weight, grade_date, note) " +
-                    "VALUES (@student_id, @subject_id, @teacher_id, @value, @weight, @grade_date, @note) RETURNING id", conn))
-                {
-                    cmd.Parameters.AddWithValue("student_id", grade.StudentId);
-                    cmd.Parameters.AddWithValue("subject_id", grade.SubjectId);
-                    cmd.Parameters.AddWithValue("teacher_id", grade.TeacherId);
-                    cmd.Parameters.AddWithValue("value", grade.Value);
-                    cmd.Parameters.AddWithValue("weight", grade.Weight);
-                    cmd.Parameters.AddWithValue("grade_date", grade.GradeDate);
-                    cmd.Parameters.AddWithValue("note", string.IsNullOrEmpty(grade.Note) ? (object)DBNull.Value : grade.Note);
-                    grade.Id = (int)cmd.ExecuteScalar();
-                }
-            }
-        }
-
-        public void Update(Grade grade)
-        {
-            using (var conn = new NpgsqlConnection(_connectionString))
-            {
-                conn.Open();
-                using (var cmd = new NpgsqlCommand(
-                    "UPDATE grades SET student_id=@student_id, subject_id=@subject_id, teacher_id=@teacher_id, value=@value, weight=@weight, grade_date=@grade_date, note=@note WHERE id=@id", conn))
-                {
-                    cmd.Parameters.AddWithValue("student_id", grade.StudentId);
-                    cmd.Parameters.AddWithValue("subject_id", grade.SubjectId);
-                    cmd.Parameters.AddWithValue("teacher_id", grade.TeacherId);
-                    cmd.Parameters.AddWithValue("value", grade.Value);
-                    cmd.Parameters.AddWithValue("weight", grade.Weight);
-                    cmd.Parameters.AddWithValue("grade_date", grade.GradeDate);
-                    cmd.Parameters.AddWithValue("note", string.IsNullOrEmpty(grade.Note) ? (object)DBNull.Value : grade.Note);
-                    cmd.Parameters.AddWithValue("id", grade.Id);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        public void Delete(int id)
-        {
-            using (var conn = new NpgsqlConnection(_connectionString))
-            {
-                conn.Open();
-                using (var cmd = new NpgsqlCommand("DELETE FROM grades WHERE id=@id", conn))
-                {
-                    cmd.Parameters.AddWithValue("id", id);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
+        return list; 
     }
+
+
 }
