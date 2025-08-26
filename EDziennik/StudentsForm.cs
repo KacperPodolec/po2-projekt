@@ -173,7 +173,6 @@ namespace EDziennik
                 try
                 {
                     var repo = new StudentRepository(_connectionString);
-                    MessageBox.Show($"Usuwanie ucznia o Id = {_selectedStudentItem.Id}");
                     repo.Delete(_selectedStudentItem.Id);
                     MessageBox.Show("Uczeń został usunięty.");
                     LoadStudents();
