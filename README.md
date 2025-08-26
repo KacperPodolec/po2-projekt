@@ -148,6 +148,7 @@ public class Class
 - **MainForm** – główny formularz aplikacji, z przyciskami do otwierania pozostałych formularzy.
 - **StudentsForm** – obsługuje dodawanie, edycję, usuwanie, wyszukiwanie uczniów.
 - **GradesForm** – obsługuje dodawanie, edycję i wyświetlanie ocen uczniów w konkretnych przedmiotach.
+
 Każdy formularz posiada metody do walidacji danych, obsługi zdarzeń i odświeżania widoku.
 
 ## Konfiguracja
