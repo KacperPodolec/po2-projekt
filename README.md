@@ -29,6 +29,7 @@ Celem projektu jest umożliwienie prowadzenia dziennika szkolnego z zarządzanie
 ## Modele danych
 Przykładowe modele w projekcie:
 - **Student**
+
 '''cs
 public class Student
     {
