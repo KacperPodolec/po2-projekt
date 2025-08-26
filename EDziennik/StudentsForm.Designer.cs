@@ -40,8 +40,8 @@
             this.cmbClass = new System.Windows.Forms.ComboBox();
             this.txtLastName = new System.Windows.Forms.TextBox();
             this.lblLastName = new System.Windows.Forms.Label();
-            this.txtBirthDate = new System.Windows.Forms.TextBox();
             this.lblBirthDate = new System.Windows.Forms.Label();
+            this.dtpBirthDate = new System.Windows.Forms.DateTimePicker();
             ((System.ComponentModel.ISupportInitialize)(this.dgvStudents)).BeginInit();
             this.SuspendLayout();
             // 
@@ -113,6 +113,7 @@
             this.btnSearch.TabIndex = 6;
             this.btnSearch.Text = "Szukaj";
             this.btnSearch.UseVisualStyleBackColor = true;
+            this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             // 
             // label2
             // 
@@ -133,7 +134,7 @@
             // cmbClass
             // 
             this.cmbClass.FormattingEnabled = true;
-            this.cmbClass.Location = new System.Drawing.Point(293, 354);
+            this.cmbClass.Location = new System.Drawing.Point(368, 354);
             this.cmbClass.Name = "cmbClass";
             this.cmbClass.Size = new System.Drawing.Size(121, 21);
             this.cmbClass.TabIndex = 9;
@@ -154,13 +155,6 @@
             this.lblLastName.TabIndex = 10;
             this.lblLastName.Text = "Nazwisko:";
             // 
-            // txtBirthDate
-            // 
-            this.txtBirthDate.Location = new System.Drawing.Point(114, 355);
-            this.txtBirthDate.Name = "txtBirthDate";
-            this.txtBirthDate.Size = new System.Drawing.Size(100, 20);
-            this.txtBirthDate.TabIndex = 13;
-            // 
             // lblBirthDate
             // 
             this.lblBirthDate.AutoSize = true;
@@ -170,12 +164,19 @@
             this.lblBirthDate.TabIndex = 12;
             this.lblBirthDate.Text = "Data urodzenia:";
             // 
+            // dtpBirthDate
+            // 
+            this.dtpBirthDate.Location = new System.Drawing.Point(114, 355);
+            this.dtpBirthDate.Name = "dtpBirthDate";
+            this.dtpBirthDate.Size = new System.Drawing.Size(200, 20);
+            this.dtpBirthDate.TabIndex = 14;
+            // 
             // StudentsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.txtBirthDate);
+            this.Controls.Add(this.dtpBirthDate);
             this.Controls.Add(this.lblBirthDate);
             this.Controls.Add(this.txtLastName);
             this.Controls.Add(this.lblLastName);
@@ -211,7 +212,7 @@
         private System.Windows.Forms.ComboBox cmbClass;
         private System.Windows.Forms.TextBox txtLastName;
         private System.Windows.Forms.Label lblLastName;
-        private System.Windows.Forms.TextBox txtBirthDate;
         private System.Windows.Forms.Label lblBirthDate;
+        private System.Windows.Forms.DateTimePicker dtpBirthDate;
     }
 }

@@ -37,5 +37,7 @@ namespace EDziennik.Models
         public DateTime BirthDate { get; set; }
         public int ClassId { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public string ClassName { get; set; }
+
     }
 }

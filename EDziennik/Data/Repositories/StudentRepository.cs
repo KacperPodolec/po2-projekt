@@ -108,6 +108,39 @@ namespace EDziennik.Data.Repositories
             return list;
         }
 
+        public List<Student> Search(string keyword)
+        {
+            var students = new List<Student>();
+            using (var conn = new NpgsqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(
+                    "SELECT s.id, s.first_name, s.last_name, s.birth_date, c.name AS class_name " +
+                    "FROM students s " +
+                    "LEFT JOIN classes c ON s.class_id = c.id " +
+                    "WHERE LOWER(s.first_name) LIKE LOWER(@keyword) OR LOWER(s.last_name) LIKE LOWER(@keyword)", conn))
+                {
+                    cmd.Parameters.AddWithValue("keyword", "%" + keyword + "%");
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            students.Add(new Student
+                            {
+                                Id = reader.GetInt32(0),
+                                FirstName = reader.GetString(1),
+                                LastName = reader.GetString(2),
+                                BirthDate = reader.GetDateTime(3),
+                                ClassName = reader.IsDBNull(4) ? "" : reader.GetString(4)
+                            });
+                        }
+                    }
+                }
+            }
+            return students;
+        }
+
 
         public void Add(Student student)
         {
