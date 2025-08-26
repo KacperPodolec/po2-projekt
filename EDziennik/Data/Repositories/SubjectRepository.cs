@@ -4,6 +4,7 @@ using EDziennik.Models;
 
 namespace EDziennik.Data.Repositories
 {
+    // Repozytorium odpowiedzialne za obsługę przedmiotów
     public class SubjectRepository
     {
         private string _connectionString;
@@ -13,30 +14,7 @@ namespace EDziennik.Data.Repositories
             _connectionString = connectionString;
         }
 
-        // Pobiera wszystkie przedmioty
-        public List<Subject> GetAll()
-        {
-            var subjects = new List<Subject>();
-            using (var conn = new NpgsqlConnection(_connectionString))
-            {
-                conn.Open();
-                using (var cmd = new NpgsqlCommand("SELECT id, name FROM subjects", conn))
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        subjects.Add(new Subject
-                        {
-                            Id = reader.GetInt32(0),
-                            Name = reader.GetString(1)
-                        });
-                    }
-                }
-            }
-            return subjects;
-        }
-
-        // Pobiera przedmioty dla danego ucznia
+        // Pobiera listę przedmiotów, z których uczeń ma wystawione oceny.
         public List<Subject> GetByStudent(int studentId)
         {
             var subjects = new List<Subject>();

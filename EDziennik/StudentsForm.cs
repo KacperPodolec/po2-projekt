@@ -16,10 +16,11 @@ namespace EDziennik
         {
             InitializeComponent();
             _connectionString = connectionString;
-            LoadClasses();
-            LoadStudents();
+            LoadClasses();  // ładuje listę klas do comboboxa
+            LoadStudents(); // ładuje uczniów do DataGridView
         }
 
+        // Ładuje wszystkie klasy z bazy danych do comboboxa
         private void LoadClasses()
         {
             var classRepo = new ClassRepository(_connectionString);
@@ -29,6 +30,7 @@ namespace EDziennik
             cmbClass.SelectedIndex = -1; // brak domyślnego wyboru
         }
 
+        // Ładuje wszystkich uczniów z bazy danych do DataGridView
         private void LoadStudents()
         {
             try
@@ -54,6 +56,7 @@ namespace EDziennik
             }
         }
 
+        // Waliduje pola formularza przed dodaniem lub edycją ucznia
         private bool ValidateStudentFields()
         {
             if (string.IsNullOrWhiteSpace(txtFirstName.Text))
@@ -89,6 +92,7 @@ namespace EDziennik
             return true;
         }
 
+        // Dodaje nowego ucznia do bazy danych
         private void btnAdd_Click(object sender, EventArgs e)
         {
             if (!ValidateStudentFields())
@@ -116,6 +120,7 @@ namespace EDziennik
             }
         }
 
+        // Edytuje dane wybranego ucznia w bazie danych
         private void btnEdit_Click(object sender, EventArgs e)
         {
             if (_selectedStudentItem == null)
@@ -154,6 +159,7 @@ namespace EDziennik
             }
         }
 
+        // Usuwa wybranego ucznia z bazy danych po potwierdzeniu
         private void btnDelete_Click(object sender, EventArgs e)
         {
             if (_selectedStudentItem == null)
@@ -185,6 +191,7 @@ namespace EDziennik
             }
         }
 
+        // Aktualizuje formularz, gdy zmieni się zaznaczenie w DataGridView
         private void dgvStudents_SelectionChanged(object sender, EventArgs e)
         {
             if (dgvStudents.CurrentRow != null)
@@ -202,8 +209,7 @@ namespace EDziennik
             }
         }
 
-
-
+        // Wyszukuje uczniów po imieniu lub nazwisku i aktualizuje DataGridView
         private void btnSearch_Click(object sender, EventArgs e)
         {
             try
@@ -239,6 +245,7 @@ namespace EDziennik
             }
         }
 
+        // Czyści pola formularza i odznacza zaznaczonego ucznia
         private void ClearForm()
         {
             txtFirstName.Clear();

@@ -6,6 +6,7 @@ using System.Windows.Forms;
 
 namespace EDziennik
 {
+    // Klasa uruchamiająca aplikację
     static class Program
     {
         /// <summary>
@@ -16,7 +17,7 @@ namespace EDziennik
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            Application.Run(new MainForm()); // Uruchamia główny formularz aplikacji
         }
     }
 }

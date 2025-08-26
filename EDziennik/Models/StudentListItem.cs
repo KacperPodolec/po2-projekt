@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace EDziennik.Models
 {
+    // Reprezentuje ucznia w formie listy
     public class StudentListItem
     {
         public int Id { get; set; }

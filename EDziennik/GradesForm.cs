@@ -9,38 +9,43 @@ namespace EDziennik
 {
     public partial class GradesForm : Form
     {
-        private string _connectionString;
-        private StudentListItem _selectedStudentItem;
-        private Subject _selectedSubject;
-        private GradeListItem _selectedGradeItem;
+        private string _connectionString;               // Przechowuje connection string do bazy
+        private StudentListItem _selectedStudentItem;   // Aktualnie wybrany uczeń w dgvStudents
+        private Subject _selectedSubject;               // Aktualnie wybrany przedmiot w cmbSubject
+        private GradeListItem _selectedGradeItem;       // Aktualnie wybrana ocena w dgvGrades
 
-        private StudentRepository _studentRepo;
-        private SubjectRepository _subjectRepo;
-        private GradeRepository _gradeRepo;
+        private StudentRepository _studentRepo;         // Repozytorium uczniów
+        private SubjectRepository _subjectRepo;         // Repozytorium przedmiotów
+        private GradeRepository _gradeRepo;             // Repozytorium ocen
 
-        private int _currentTeacherId;
+        private int _currentTeacherId;                  // Id aktualnego nauczyciela (ustawione na sztywno na 1)
 
         public GradesForm(string connectionString)
         {
             InitializeComponent();
             _connectionString = connectionString;
 
+            // Repozytoria do obsługi bazy danych
             _studentRepo = new StudentRepository(_connectionString);
             _subjectRepo = new SubjectRepository(_connectionString);
             _gradeRepo = new GradeRepository(_connectionString);
 
+            // Zdarzenie kontroli
             dgvStudents.SelectionChanged += dgvStudents_SelectionChanged;
             dgvGrades.SelectionChanged += dgvGrades_SelectionChanged;
             cmbSubject.SelectedIndexChanged += cmbSubject_SelectedIndexChanged;
 
+            // Domyślne pierwsze elementry comboBoxów
             if (cmbGradeValue.Items.Count > 0) cmbGradeValue.SelectedIndex = 0;
             if (cmbGradeWeight.Items.Count > 0) cmbGradeWeight.SelectedIndex = 0;
 
-            _currentTeacherId = 1; // sztywne ID istniejącego nauczyciela
+            _currentTeacherId = 1;  // sztywne ID nauczyciela
 
-            LoadStudents();
+            LoadStudents();         // załadowanie listy uczniów do DataGridView
         }
 
+        // METODY
+        // Ładuje listę uczniów z nazwami klas do DataGridView
         private void LoadStudents()
         {
             var students = _studentRepo.GetAllWithClassNames();
@@ -48,10 +53,12 @@ namespace EDziennik
             dgvStudents.DataSource = students;
             dgvStudents.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
+            // Ukrywanie kolumn, które mają być niewidoczne w DataGridView
             if (dgvStudents.Columns["Id"] != null) dgvStudents.Columns["Id"].Visible = false;
             if (dgvStudents.Columns["ClassId"] != null) dgvStudents.Columns["ClassId"].Visible = false;
         }
 
+        // Ładuje listę przedmiotów dla wybranego ucznia do ComboBoxa
         private void LoadSubjectsForSelectedStudent()
         {
             if (_selectedStudentItem == null) return;
@@ -71,6 +78,7 @@ namespace EDziennik
             }
         }
 
+        // Aktualizuje wybrany wiersz ucznia i wyświetla jego szczegóły
         private void dgvStudents_SelectionChanged(object sender, EventArgs e)
         {
             if (dgvStudents.CurrentRow == null) return;
@@ -86,6 +94,7 @@ namespace EDziennik
             LoadSubjectsForSelectedStudent();
         }
 
+        // Aktualizuje wybrany przedmiot i ładuje oceny ucznia
         private void cmbSubject_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (_selectedStudentItem == null || cmbSubject.SelectedItem == null) return;
@@ -97,6 +106,7 @@ namespace EDziennik
             }
         }
 
+        // Ładuje oceny ucznia dla wybranego przedmiotu do DataGridView
         private void LoadGrades(int studentId, int subjectId)
         {
             var grades = _gradeRepo.GetByStudentAndSubject(studentId, subjectId);
@@ -113,6 +123,7 @@ namespace EDziennik
             _selectedGradeItem = null;
         }
 
+        // Aktualizuje wybraną ocenę w kontrolkach edycyjnych po zmianie zaznaczenia w DataGridView
         private void dgvGrades_SelectionChanged(object sender, EventArgs e)
         {
             if (dgvGrades.CurrentRow == null) return;
@@ -128,6 +139,7 @@ namespace EDziennik
             dgvGrades.CurrentRow.Selected = true;
         }
 
+        // Dodaje nową ocenę
         private void btnAdd_Click(object sender, EventArgs e)
         {
             if (_selectedStudentItem == null || _selectedSubject == null)
@@ -151,6 +163,7 @@ namespace EDziennik
             LoadGrades(_selectedStudentItem.Id, _selectedSubject.Id);
         }
 
+        // Edytuje ocenę w bazie
         private void btnEdit_Click(object sender, EventArgs e)
         {
             if (_selectedGradeItem == null)
@@ -171,6 +184,7 @@ namespace EDziennik
             LoadGrades(_selectedStudentItem.Id, _selectedSubject.Id);
         }
 
+        // Usuwa ocenę z bazy
         private void btnDelete_Click(object sender, EventArgs e)
         {
             if (_selectedGradeItem == null)

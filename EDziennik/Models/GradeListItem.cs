@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace EDziennik.Models
 {
+    // Reprezentuje ocenę ucznia do wyświetlenia w liście
     public class GradeListItem
     {
         public int Id { get; set; }

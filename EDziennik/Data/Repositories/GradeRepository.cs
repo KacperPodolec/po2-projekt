@@ -13,43 +13,7 @@ public class GradeRepository
         _connectionString = connectionString;
     }
 
-    public List<GradeListItem> GetByStudent(int studentId)
-    {
-        var grades = new List<GradeListItem>();
-
-        using (var conn = new NpgsqlConnection(_connectionString))
-        {
-            conn.Open();
-            var cmd = new NpgsqlCommand(@"
-                SELECT g.id, g.student_id, s.name AS subject_name, g.value, g.weight, g.grade_date, g.note
-                FROM grades g
-                JOIN subject s ON g.subject_id = s.id
-                WHERE g.student_id = @studentId
-                ORDER BY g.grade_date DESC", conn);
-
-            cmd.Parameters.AddWithValue("studentId", studentId);
-
-            using (var reader = cmd.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    grades.Add(new GradeListItem
-                    {
-                        Id = reader.GetInt32(0),
-                        StudentId = reader.GetInt32(1),
-                        SubjectName = reader.GetString(2),
-                        Value = reader.GetDecimal(3),
-                        Weight = reader.GetDecimal(4),
-                        GradeDate = reader.GetDateTime(5),
-                        Note = reader.IsDBNull(6) ? "" : reader.GetString(6)
-                    });
-                }
-            }
-        }
-
-        return grades;
-    }
-
+    // Dodawanie nowej oceny
     public void Add(Grade grade)
     {
         using (var conn = new NpgsqlConnection(_connectionString))
@@ -71,6 +35,7 @@ public class GradeRepository
         }
     }
 
+    // Edycja oceny
     public void Update(Grade grade)
     {
         using (var conn = new NpgsqlConnection(_connectionString))
@@ -89,10 +54,12 @@ public class GradeRepository
             cmd.Parameters.AddWithValue("note", grade.Note ?? "");
             cmd.Parameters.AddWithValue("id", grade.Id);
 
+            // wykonanie UPDATE
             cmd.ExecuteNonQuery();
         }
     }
 
+    // Usuwanie oceny
     public void Delete(int id)
     {
         using (var conn = new NpgsqlConnection(_connectionString))
@@ -100,10 +67,14 @@ public class GradeRepository
             conn.Open();
             var cmd = new NpgsqlCommand("DELETE FROM grades WHERE id=@id", conn);
             cmd.Parameters.AddWithValue("id", id);
+
+            // wykonanie DELETE
             cmd.ExecuteNonQuery();
         }
     }
 
+    // Metoda pobierająca listę ocen ucznia dla danego przedmiotu
+    // Wyświetla wszystkie oceny wybranego ucznia w DateGridView
     public List<GradeListItem> GetByStudentAndSubject(int studentId, int subjectId)
     {
         var list = new List<GradeListItem>();
@@ -144,6 +115,8 @@ public class GradeRepository
         return list; 
     }
 
+    // Metoda pobierająca pojedyńczą ocenę po ID
+    // Zwraca pojedyńczą ocene podczas wybrania jej od edycji
     public Grade GetById(int id)
     {
         using (var conn = new NpgsqlConnection(_connectionString))
@@ -173,5 +146,4 @@ public class GradeRepository
         }
         return null;
     }
-
 }

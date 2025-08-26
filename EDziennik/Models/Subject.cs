@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace EDziennik.Models
 {
+    // Reprezentuje przedmiot szkolny
     public class Subject
     {
         public int Id { get; set; }

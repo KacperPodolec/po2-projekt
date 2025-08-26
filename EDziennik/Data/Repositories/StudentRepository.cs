@@ -5,6 +5,7 @@ using EDziennik.Models;
 
 namespace EDziennik.Data.Repositories
 {
+    // Repozytorium odpowiedzialne za obsługę uczniów w bazie danych.
     public class StudentRepository
     {
         private string _connectionString;
@@ -12,34 +13,9 @@ namespace EDziennik.Data.Repositories
         public StudentRepository(string connectionString)
         {
             _connectionString = connectionString;
-        }
+        } 
 
-        public List<Student> GetAll()
-        {
-            var students = new List<Student>();
-            using (var conn = new NpgsqlConnection(_connectionString))
-            {
-                conn.Open();
-                using (var cmd = new NpgsqlCommand("SELECT id, first_name, last_name, birth_date, class_id, created_at FROM students", conn))
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        students.Add(new Student
-                        {
-                            Id = reader.GetInt32(0),
-                            FirstName = reader.GetString(1),
-                            LastName = reader.GetString(2),
-                            BirthDate = reader.GetDateTime(3),
-                            ClassId = reader.GetInt32(4),
-                            CreatedAt = reader.GetDateTime(5)
-                        });
-                    }
-                }
-            }
-            return students;
-        }
-
+        // Metoda pobiera pojedyńczego ucznia po jego ID
         public Student GetById(int id)
         {
             Student student = null;
@@ -69,6 +45,7 @@ namespace EDziennik.Data.Repositories
             return student;
         }
 
+        // Metoda pobiera wszystkich uczniów wraz z nazwami klas, do których należą
         public List<StudentListItem> GetAllWithClassNames()
         {
             var students = new List<StudentListItem>();
@@ -98,41 +75,7 @@ namespace EDziennik.Data.Repositories
             return students;
         }
 
-
-        public List<Student> Search(string keyword)
-        {
-            var students = new List<Student>();
-            using (var conn = new NpgsqlConnection(_connectionString))
-            {
-                conn.Open();
-                using (var cmd = new NpgsqlCommand(
-                    "SELECT s.id, s.first_name, s.last_name, s.birth_date, c.name AS class_name " +
-                    "FROM students s " +
-                    "LEFT JOIN classes c ON s.class_id = c.id " +
-                    "WHERE LOWER(s.first_name) LIKE LOWER(@keyword) OR LOWER(s.last_name) LIKE LOWER(@keyword)", conn))
-                {
-                    cmd.Parameters.AddWithValue("keyword", "%" + keyword + "%");
-
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            students.Add(new Student
-                            {
-                                Id = reader.GetInt32(0),
-                                FirstName = reader.GetString(1),
-                                LastName = reader.GetString(2),
-                                BirthDate = reader.GetDateTime(3),
-                                ClassName = reader.IsDBNull(4) ? "" : reader.GetString(4)
-                            });
-                        }
-                    }
-                }
-            }
-            return students;
-        }
-
-
+        // Metoda dodająca nowego ucznia
         public void Add(Student student)
         {
             using (var conn = new NpgsqlConnection(_connectionString))
@@ -150,6 +93,7 @@ namespace EDziennik.Data.Repositories
             }
         }
 
+        // Metoda aktualizująca dane ucznia
         public void Update(Student student)
         {
             using (var conn = new NpgsqlConnection(_connectionString))
@@ -168,6 +112,7 @@ namespace EDziennik.Data.Repositories
             }
         }
 
+        // Metoda usuwająca dane ucznia
         public void Delete(int studentId)
         {
             using (var conn = new NpgsqlConnection(_connectionString))
@@ -185,7 +130,7 @@ namespace EDziennik.Data.Repositories
             }
         }
 
-
+        // Metoda wyszukująca uczniów po imieniu i nazwisku
         public List<StudentListItem> SearchByName(string keyword)
         {
             var students = new List<StudentListItem>();
@@ -216,6 +161,5 @@ namespace EDziennik.Data.Repositories
             }
             return students;
         }
-
     }
 }
