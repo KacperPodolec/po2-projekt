@@ -41,6 +41,9 @@
             this.cmbGradeWeight = new System.Windows.Forms.ComboBox();
             this.dtpGradeDate = new System.Windows.Forms.DateTimePicker();
             this.txtGradeNote = new System.Windows.Forms.TextBox();
+            this.btnAdd = new System.Windows.Forms.Button();
+            this.btnEdit = new System.Windows.Forms.Button();
+            this.btnDelete = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvStudents)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvGrades)).BeginInit();
@@ -105,8 +108,10 @@
             // 
             this.dgvGrades.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvGrades.Location = new System.Drawing.Point(0, 250);
+            this.dgvGrades.MultiSelect = false;
             this.dgvGrades.Name = "dgvGrades";
             this.dgvGrades.ReadOnly = true;
+            this.dgvGrades.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvGrades.Size = new System.Drawing.Size(810, 150);
             this.dgvGrades.TabIndex = 6;
             // 
@@ -153,11 +158,44 @@
             this.txtGradeNote.Size = new System.Drawing.Size(100, 20);
             this.txtGradeNote.TabIndex = 10;
             // 
+            // btnAdd
+            // 
+            this.btnAdd.Location = new System.Drawing.Point(402, 453);
+            this.btnAdd.Name = "btnAdd";
+            this.btnAdd.Size = new System.Drawing.Size(75, 23);
+            this.btnAdd.TabIndex = 11;
+            this.btnAdd.Text = "Dodaj";
+            this.btnAdd.UseVisualStyleBackColor = true;
+            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
+            // 
+            // btnEdit
+            // 
+            this.btnEdit.Location = new System.Drawing.Point(483, 453);
+            this.btnEdit.Name = "btnEdit";
+            this.btnEdit.Size = new System.Drawing.Size(75, 23);
+            this.btnEdit.TabIndex = 12;
+            this.btnEdit.Text = "Edytuj";
+            this.btnEdit.UseVisualStyleBackColor = true;
+            this.btnEdit.Click += new System.EventHandler(this.btnEdit_Click);
+            // 
+            // btnDelete
+            // 
+            this.btnDelete.Location = new System.Drawing.Point(563, 453);
+            this.btnDelete.Name = "btnDelete";
+            this.btnDelete.Size = new System.Drawing.Size(75, 23);
+            this.btnDelete.TabIndex = 13;
+            this.btnDelete.Text = "Usuń";
+            this.btnDelete.UseVisualStyleBackColor = true;
+            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
+            // 
             // GradesForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(886, 546);
+            this.Controls.Add(this.btnDelete);
+            this.Controls.Add(this.btnEdit);
+            this.Controls.Add(this.btnAdd);
             this.Controls.Add(this.txtGradeNote);
             this.Controls.Add(this.dtpGradeDate);
             this.Controls.Add(this.cmbGradeWeight);
@@ -193,5 +231,8 @@
         private System.Windows.Forms.ComboBox cmbGradeWeight;
         private System.Windows.Forms.DateTimePicker dtpGradeDate;
         private System.Windows.Forms.TextBox txtGradeNote;
+        private System.Windows.Forms.Button btnAdd;
+        private System.Windows.Forms.Button btnEdit;
+        private System.Windows.Forms.Button btnDelete;
     }
 }

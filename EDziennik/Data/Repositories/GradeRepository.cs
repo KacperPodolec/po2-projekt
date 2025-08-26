@@ -144,5 +144,34 @@ public class GradeRepository
         return list; 
     }
 
+    public Grade GetById(int id)
+    {
+        using (var conn = new NpgsqlConnection(_connectionString))
+        {
+            conn.Open();
+            using (var cmd = new NpgsqlCommand("SELECT * FROM grades WHERE id = @id", conn))
+            {
+                cmd.Parameters.AddWithValue("id", id);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return new Grade
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            StudentId = reader.GetInt32(reader.GetOrdinal("student_id")),
+                            SubjectId = reader.GetInt32(reader.GetOrdinal("subject_id")),
+                            TeacherId = reader.GetInt32(reader.GetOrdinal("teacher_id")),
+                            Value = reader.GetInt16(reader.GetOrdinal("value")),
+                            Weight = reader.GetInt16(reader.GetOrdinal("weight")),
+                            GradeDate = reader.GetDateTime(reader.GetOrdinal("grade_date")),
+                            Note = reader.IsDBNull(reader.GetOrdinal("note")) ? "" : reader.GetString(reader.GetOrdinal("note"))
+                        };
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
 }
