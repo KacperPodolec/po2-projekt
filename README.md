@@ -7,7 +7,8 @@
 4. [Modele danych](#modele-danych)
 5. [Repozytoria](#repozytoria)
 6. [Formularze](#formularze)
-7. [Konfiguracja](#konfiguracja)
+7. [Diagram ERD](#diagram-erd)
+8. [Konfiguracja](#konfiguracja)
 
 ## Opis projektu
 EDziennik to aplikacja desktopowa napisana w C# z wykorzystaniem Windows Forms i bazy PostgreSQL.
@@ -150,6 +151,9 @@ public class Class
 - **GradesForm** – obsługuje dodawanie, edycję i wyświetlanie ocen uczniów w konkretnych przedmiotach.
 
 Każdy formularz posiada metody do walidacji danych, obsługi zdarzeń i odświeżania widoku.
+
+## Diagram ERD
+![diagram erd](edziennik-erd.drawio.png)
 
 ## Konfiguracja
 Plik App.config zawiera połączenie z bazą danych:
