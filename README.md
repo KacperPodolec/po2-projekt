@@ -30,7 +30,7 @@ Celem projektu jest umożliwienie prowadzenia dziennika szkolnego z zarządzanie
 Przykładowe modele w projekcie:
 - **Student**
 
-'''cs
+```csharp
 public class Student
     {
         public int Id { get; set; }
@@ -65,4 +65,4 @@ public class Student
         public string ClassName { get; set; }
 
     }
-'''
+```
