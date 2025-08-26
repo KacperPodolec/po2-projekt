@@ -111,6 +111,8 @@
     <Compile Include="Models\Class.cs" />
     <Compile Include="Models\Grade.cs" />
     <Compile Include="Models\Student.cs" />
+    <Compile Include="Models\StudentListItem.cs" />
+    <Compile Include="Models\StudentViewModel.cs" />
     <Compile Include="Models\Subject.cs" />
     <Compile Include="Models\Teacher.cs" />
     <Compile Include="Models\TeacherSubjectClass.cs" />

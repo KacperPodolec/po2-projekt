@@ -69,6 +69,46 @@ namespace EDziennik.Data.Repositories
             return student;
         }
 
+        public List<StudentListItem> GetAllWithClassNames()
+        {
+            var list = new List<StudentListItem>();
+
+            using (var conn = new NpgsqlConnection(_connectionString))
+            {
+                conn.Open();
+                string sql = @"
+                    SELECT s.id,
+                           s.first_name,
+                           s.last_name,
+                           s.birth_date,
+                           s.class_id,
+                           c.name AS class_name
+                    FROM students s
+                    JOIN classes c ON c.id = s.class_id
+                    ORDER BY s.last_name, s.first_name";
+
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        list.Add(new StudentListItem
+                        {
+                            Id = reader.GetInt32(0),
+                            FirstName = reader.GetString(1),
+                            LastName = reader.GetString(2),
+                            BirthDate = reader.GetDateTime(3),
+                            ClassId = reader.GetInt32(4),
+                            ClassName = reader.GetString(5)
+                        });
+                    }
+                }
+            }
+
+            return list;
+        }
+
+
         public void Add(Student student)
         {
             using (var conn = new NpgsqlConnection(_connectionString))
