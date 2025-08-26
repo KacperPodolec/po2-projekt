@@ -36,22 +36,29 @@ namespace EDziennik
             try
             {
                 var repo = new StudentRepository(_connectionString);
-                var data = repo.GetAllWithClassNames();
+                List<StudentListItem> data = repo.GetAllWithClassNames();
 
                 dgvStudents.AutoGenerateColumns = true;
                 dgvStudents.DataSource = data;
                 dgvStudents.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
+                // Ukrycie kolumny Id, jeśli istnieje
                 if (dgvStudents.Columns["Id"] != null)
                     dgvStudents.Columns["Id"].Visible = false;
+
+                // W razie czego ukrycie innych niepotrzebnych kolumn
                 if (dgvStudents.Columns["ClassId"] != null)
                     dgvStudents.Columns["ClassId"].Visible = false;
+                if (dgvStudents.Columns["CreatedAt"] != null)
+                    dgvStudents.Columns["CreatedAt"].Visible = false;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Błąd podczas ładowania uczniów: {ex.Message}");
             }
         }
+
+
 
         private void LoadClasses()
         {
@@ -163,27 +170,20 @@ namespace EDziennik
 
         private void btnSearch_Click(object sender, EventArgs e)
         {
-            try
-            {
-                var keyword = txtSearch.Text.Trim();
-                var repo = new StudentRepository(_connectionString);
+            var repo = new StudentRepository(_connectionString);
+            var keyword = txtSearch.Text.Trim();
 
-                if (string.IsNullOrEmpty(keyword))
-                {
-                    // Jeśli pole jest puste, ładujemy wszystkich uczniów
-                    dgvStudents.DataSource = repo.GetAll();
-                }
-                else
-                {
-                    dgvStudents.DataSource = repo.Search(keyword);
-                }
+            List<StudentListItem> students;
+            if (string.IsNullOrEmpty(keyword))
+                students = repo.GetAllWithClassNames();
+            else
+                students = repo.SearchByName(keyword);
 
-                dgvStudents.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Błąd podczas wyszukiwania: {ex.Message}");
-            }
+            dgvStudents.DataSource = students;
+            dgvStudents.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
+
+
+
     }
 }

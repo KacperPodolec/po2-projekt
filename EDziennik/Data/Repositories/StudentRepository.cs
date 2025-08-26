@@ -71,41 +71,29 @@ namespace EDziennik.Data.Repositories
 
         public List<StudentListItem> GetAllWithClassNames()
         {
-            var list = new List<StudentListItem>();
-
+            var students = new List<StudentListItem>();
             using (var conn = new NpgsqlConnection(_connectionString))
             {
                 conn.Open();
-                string sql = @"
-                    SELECT s.id,
-                           s.first_name,
-                           s.last_name,
-                           s.birth_date,
-                           s.class_id,
-                           c.name AS class_name
-                    FROM students s
-                    JOIN classes c ON c.id = s.class_id
-                    ORDER BY s.last_name, s.first_name";
-
-                using (var cmd = new NpgsqlCommand(sql, conn))
+                using (var cmd = new NpgsqlCommand(
+                    @"SELECT s.id, s.first_name, s.last_name, s.birth_date, c.name as class_name
+              FROM students s
+              LEFT JOIN classes c ON s.class_id = c.id", conn))
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        list.Add(new StudentListItem
+                        students.Add(new StudentListItem
                         {
-                            Id = reader.GetInt32(0),
                             FirstName = reader.GetString(1),
                             LastName = reader.GetString(2),
                             BirthDate = reader.GetDateTime(3),
-                            ClassId = reader.GetInt32(4),
-                            ClassName = reader.GetString(5)
+                            ClassName = reader.GetString(4)
                         });
                     }
                 }
             }
-
-            return list;
+            return students;
         }
 
         public List<Student> Search(string keyword)
@@ -189,5 +177,37 @@ namespace EDziennik.Data.Repositories
                 }
             }
         }
+
+        public List<StudentListItem> SearchByName(string keyword)
+        {
+            var students = new List<StudentListItem>();
+            using (var conn = new NpgsqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(
+                    @"SELECT s.id, s.first_name, s.last_name, s.birth_date, c.name as class_name
+              FROM students s
+              LEFT JOIN classes c ON s.class_id = c.id
+              WHERE s.first_name ILIKE @kw OR s.last_name ILIKE @kw", conn))
+                {
+                    cmd.Parameters.AddWithValue("kw", $"%{keyword}%");
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            students.Add(new StudentListItem
+                            {
+                                FirstName = reader.GetString(1),
+                                LastName = reader.GetString(2),
+                                BirthDate = reader.GetDateTime(3),
+                                ClassName = reader.GetString(4)
+                            });
+                        }
+                    }
+                }
+            }
+            return students;
+        }
+
     }
 }
